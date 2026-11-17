@@ -1,0 +1,637 @@
+/* =====================================================================
+   Kokpit walutowy NBP — tokeny i komponenty wspólne (SPEC.md §4)
+   Moduły nie wstrzykują własnego CSS — korzystają wyłącznie z tych klas.
+   ===================================================================== */
+
+/* ---------- 1. Tokeny: motyw jasny ---------- */
+:root {
+  color-scheme: light dark;
+
+  /* kolory */
+  --color-bg: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-surface-2: #eef1f5;
+  --color-text: #14181f;
+  --color-text-muted: #5a6472;
+  --color-border: #d6dbe3;        /* dekoracyjne obramowania (karty, separatory) */
+  --color-border-strong: #7c8696; /* obrys kontrolek: ≥ 3:1 na surface i surface-2 (WCAG 1.4.11) */
+  --color-accent: #1f5fbf;
+  --color-accent-text: #ffffff;
+  --color-focus: #1f5fbf;
+  --color-up: #18794e;
+  --color-up-bg: #e6f4ec;
+  --color-down: #c4320a;
+  --color-down-bg: #fdece6;
+  --color-flat: #5a6472;
+  --color-info-bg: #e8f0fc;
+  --color-error: #b42318;
+  --color-error-bg: #fdecea;
+  /* paleta serii oddzielona od semantycznych kolorów wzrostu/spadku */
+  --series-1: #1f5fbf;
+  --series-2: #b25e00;
+  --series-3: #8a3ffc;
+  --series-4: #0e7c86;
+  --series-5: #c2185b;
+  --series-6: #6d4c41;
+  --chart-grid: rgba(20, 24, 31, .08);
+
+  /* typografia */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --fs-xs: .75rem;
+  --fs-sm: .875rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.75rem;
+  --fs-2xl: 2.25rem;
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-bold: 650;
+  --lh: 1.5;
+
+  /* odstępy i kształt */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 2px 8px rgba(0, 0, 0, .04);
+  --container-pad: 16px; /* boczny margines na telefonie */
+  --container-max: 1100px;
+}
+
+/* ---------- 1b. Tokeny: motyw ciemny ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0f1318;
+    --color-surface: #171c23;
+    --color-surface-2: #1f2630;
+    --color-text: #e7ebf0;
+    --color-text-muted: #9aa4b2;
+    --color-border: #2c3440;
+    --color-border-strong: #66717f;
+    --color-accent: #6ea8ff;
+    --color-accent-text: #0f1318;
+    --color-focus: #6ea8ff;
+    --color-up: #4cc38a;
+    --color-up-bg: #12301f;
+    --color-down: #ff7a59;
+    --color-down-bg: #3a1a12;
+    --color-flat: #9aa4b2;
+    --color-info-bg: #16243a;
+    --color-error: #ff8a80;
+    --color-error-bg: #3a1614;
+    --series-1: #6ea8ff;
+    --series-2: #f0a24a;
+    --series-3: #b48cff;
+    --series-4: #3cc4cf;
+    --series-5: #f06bb0;
+    --series-6: #c49a82;
+    --chart-grid: rgba(231, 235, 240, .1);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 2px 8px rgba(0, 0, 0, .25);
+  }
+}
+
+@media (min-width: 640px) {
+  :root { --container-pad: 24px; }
+}
+
+/* ---------- 2. Baza ---------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  line-height: var(--lh);
+  overflow-x: hidden; /* zabezpieczenie: brak poziomego scrolla przy 360px */
+}
+
+h1, h2, h3, p, ul, ol, dl, dd, figure { margin: 0; }
+ul[class], ol[class] { list-style: none; padding: 0; }
+
+a { color: var(--color-accent); text-underline-offset: 2px; }
+a:hover { text-decoration-thickness: 2px; }
+
+img, svg, canvas { max-width: 100%; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+legend { padding: 0; }
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+[hidden] { display: none !important; }
+
+/* ---------- 3. Narzędziowe ---------- */
+.muted { color: var(--color-text-muted); }
+.mono { font-family: var(--font-mono); }
+.num { font-variant-numeric: tabular-nums; }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: -100px;
+  z-index: 10;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+  border-radius: var(--radius-sm);
+  font-weight: var(--fw-medium);
+}
+.skip-link:focus { top: var(--space-2); }
+
+/* ---------- 4. Układ strony ---------- */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+.site-header {
+  padding-block: var(--space-6) var(--space-5);
+}
+.site-title {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: -.01em;
+  line-height: 1.2;
+}
+.site-subtitle {
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-7);
+  padding-bottom: var(--space-7);
+}
+.layout > * { min-width: 0; }
+main:focus { outline: none; }
+
+/* ≥ 960px: kursy na całą szerokość, pod spodem wykres (2fr) i przelicznik (1fr) */
+@media (min-width: 960px) {
+  .site-title { font-size: var(--fs-2xl); }
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    column-gap: var(--space-5);
+  }
+  #sekcja-kursy { grid-column: 1 / -1; }
+}
+
+.site-footer {
+  padding-block: var(--space-5) var(--space-6);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
+.site-footer p + p { margin-top: var(--space-2); }
+
+/* ---------- 5. Sekcje ---------- */
+.section { min-width: 0; }
+.section__title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  line-height: 1.3;
+}
+.section__desc {
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
+.section__title + .card,
+.section__desc + .card,
+.section > .alert { margin-top: var(--space-4); }
+
+/* ---------- 6. Karty ---------- */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: var(--space-5);
+  min-width: 0;
+}
+.card:has(> .card__header, > .card__body) { padding: 0; }
+.card__header {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+  overflow-wrap: anywhere;
+}
+.card__body {
+  padding: var(--space-5);
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.card__body > * { min-width: 0; }
+
+/* Stan ładowania — pasek u góry karty; treść zostaje w pełnym kontraście */
+.is-loading { position: relative; }
+.is-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+  background-size: 50% 100%;
+  background-repeat: no-repeat;
+  animation: loading-bar 1.1s linear infinite;
+}
+@keyframes loading-bar {
+  from { background-position: -50% 0; }
+  to { background-position: 150% 0; }
+}
+
+/* ---------- 7. Przyciski ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  min-width: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-weight: var(--fw-medium);
+  line-height: 1.2;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color .15s, border-color .15s;
+}
+.btn:hover { border-color: var(--color-text-muted); }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+
+.btn--primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-text);
+}
+.btn--primary:hover { filter: brightness(1.08); border-color: var(--color-accent); }
+
+.btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-accent);
+}
+.btn--ghost:hover { background: var(--color-surface-2); border-color: transparent; }
+
+.btn--sm {
+  font-size: var(--fs-sm);
+  padding: var(--space-1) var(--space-3);
+}
+
+/* ---------- 8. Formularze ---------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.field__label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-text);
+}
+legend.field__label { margin-bottom: var(--space-1); }
+
+.field__input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius);
+  font-size: var(--fs-md);
+}
+.field__input:hover { border-color: var(--color-text); }
+.field__input[aria-invalid="true"] {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 1px var(--color-error);
+}
+select.field__input { cursor: pointer; }
+
+.field__hint {
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+}
+
+.field--inline {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.field-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.field-row > .field { flex: 1 1 140px; }
+
+/* Checkbox z etykietą */
+.checkbox {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding-block: var(--space-2);
+  cursor: pointer;
+  line-height: 1.4;
+}
+.checkbox input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex: none;
+  accent-color: var(--color-accent);
+}
+.checkbox:has(input:disabled) { color: var(--color-text-muted); cursor: not-allowed; }
+
+/* Przełącznik segmentowy (radio) */
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius);
+  width: fit-content;
+  max-width: 100%;
+}
+.segmented input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+.segmented__option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  min-width: 44px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  text-align: center;
+}
+.segmented__option:hover { color: var(--color-text); }
+.segmented input:checked + .segmented__option {
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+  box-shadow: var(--shadow);
+}
+.segmented input:focus-visible + .segmented__option {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+/* Checkbox jako pigułka (wybór walut wykresu) */
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  gap: 6px;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  user-select: none;
+}
+.chip input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+.chip:hover { border-color: var(--color-text); }
+.chip:has(input:disabled) {
+  border-style: dashed;
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+/* Znacznik koloru serii na zaznaczonej pigułce (kolor jak linia na wykresie) */
+.chip__dot {
+  display: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--chip-dot, currentColor);
+  box-shadow: 0 0 0 2px var(--color-surface);
+  flex: none;
+}
+.chip:has(input:checked) .chip__dot { display: inline-block; }
+.chip:has(input:checked) {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-text);
+}
+.chip:has(input:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+/* Długa lista walut: przewijanie w pionie zamiast „ściany” pigułek */
+.field-row:has(> .chip) {
+  align-items: center;
+  gap: var(--space-2);
+  max-height: 168px;
+  overflow-y: auto;
+  padding: var(--space-1);
+}
+
+/* ---------- 9. Komunikaty ---------- */
+.alert {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  border-left: 4px solid currentColor;
+  font-size: var(--fs-sm);
+  overflow-wrap: anywhere;
+}
+.alert--info {
+  background: var(--color-info-bg);
+  color: var(--color-text);
+  border-left-color: var(--color-accent);
+}
+.alert--error {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+.alert:empty { display: none; }
+
+/* ---------- 10. Kafle kursów ---------- */
+.rate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-3);
+}
+@media (max-width: 400px) {
+  .rate-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+}
+
+.rate-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-4);
+  box-shadow: none;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.rate-card__code {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  letter-spacing: .04em;
+}
+.rate-card__name {
+  font-size: var(--fs-xs);
+  line-height: 1.3;
+  min-height: 2.6em; /* wyrównanie kafli przy dwulinijkowych nazwach */
+  overflow-wrap: anywhere;
+}
+.rate-card__mid {
+  margin-top: var(--space-2);
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  line-height: 1.15;
+  letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap; /* nigdy nie łamać liczby w środku */
+}
+/* Rozmiar dopasowany do szerokości kafla (container query units) */
+@supports (font-size: 1cqi) {
+  .rate-card { container-type: inline-size; }
+  .rate-card__mid { font-size: clamp(1rem, 17cqi, var(--fs-xl)); }
+  .rate-card__mid--long { font-size: clamp(.875rem, 13cqi, 1.5rem); }
+}
+@supports not (font-size: 1cqi) {
+  .rate-card__mid { font-size: clamp(1rem, 5vw, var(--fs-xl)); }
+  .rate-card__mid--long { font-size: clamp(.875rem, 3.8vw, 1.5rem); }
+}
+.rate-card__unit {
+  font-size: var(--fs-xs);
+}
+.rate-card__prev {
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+.rate-card__change {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+.rate-card__remove {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+  margin-left: calc(-1 * var(--space-3));
+}
+
+/* Kolory zmian */
+.change--up { color: var(--color-up); background: var(--color-up-bg); }
+.change--down { color: var(--color-down); background: var(--color-down-bg); }
+.change--flat { color: var(--color-flat); background: var(--color-surface-2); }
+
+/* ---------- 11. Wykres ---------- */
+.chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  min-width: 0;
+}
+@media (max-width: 640px) {
+  .chart-wrap { height: 260px; }
+}
+
+/* ---------- 12. Wynik przelicznika ---------- */
+.result {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.result__value {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  line-height: 1.2;
+  letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.result__value strong { color: var(--color-accent); font-weight: inherit; }
+.result__meta {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-1) var(--space-4);
+  font-size: var(--fs-sm);
+}
+.result__meta dt { color: var(--color-text-muted); }
+.result__meta dd {
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+/* ---------- 13. Ruch ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

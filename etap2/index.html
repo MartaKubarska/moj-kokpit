@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Kursy średnie NBP, wykres zmian i przelicznik walut na dowolny dzień.">
+  <title>Kokpit walutowy NBP</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Chart.js jako klasyczny skrypt (globalny Chart), ładowany przed app.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Przejdź do treści</a>
+
+  <header class="site-header">
+    <div class="container">
+      <h1 class="site-title">Kokpit walutowy</h1>
+      <p class="site-subtitle">Kursy średnie NBP · tabele A i B</p>
+    </div>
+  </header>
+
+  <!-- Tylko kontenery: zawartość renderują moduły (wykres.js, przelicznik.js) -->
+  <main id="main" class="container layout" tabindex="-1">
+    <section id="sekcja-kursy" class="section" aria-labelledby="kursy-h"></section>
+    <section id="sekcja-wykres" class="section" aria-labelledby="wykres-h"></section>
+    <section id="sekcja-przelicznik" class="section" aria-labelledby="przel-h"></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>
+        Źródło danych: <a href="https://api.nbp.pl/">Narodowy Bank Polski — API</a>.
+        Kursy średnie, tabela A (dzienna) i B (tygodniowa). Dane informacyjne.
+      </p>
+      <p class="muted" id="stopka-info"></p>
+    </div>
+  </footer>
+</body>
+</html>
